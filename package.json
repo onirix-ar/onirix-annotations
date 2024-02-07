@@ -1,0 +1,36 @@
+{
+  "name": "@onirix/annotations",
+  "version": "0.0.1",
+  "description": "Onirix helper for annotation experiences.",
+  "main": "./dist/ox-annotations.js",
+  "module": "./dist/ox-annotations.esm.js",
+  "unpkg": "./dist/ox-annotations.umd.js",
+  "source": "src/OnirixAnnotations.js",
+  "scripts": {
+    "build": "rimraf dist && microbundle --name OnirixAnnotations --external none --sourcemap false",
+    "local-run": "npm install && npm run build && npx http-server -p 5001 --cors --ssl --key ../onirix-studio/devcert/server.key --cert ../onirix-studio/devcert/server.crt -c-1"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "author": "Onirix",
+  "license": "Propietary",
+  "devDependencies": {
+    "microbundle": "^0.13.0",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@onirix/embed-sdk": "^1.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onirix-ar/onirix-annotations"
+  },
+  "keywords": [
+    "Augmented reality",
+    "WebAR",
+    "Industry"
+  ]
+}
