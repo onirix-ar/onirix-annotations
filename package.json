@@ -1,6 +1,6 @@
 {
   "name": "@onirix/annotations",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Onirix helper for annotation experiences.",
   "main": "./dist/ox-annotations.js",
   "module": "./dist/ox-annotations.esm.js",
