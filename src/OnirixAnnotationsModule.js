@@ -16,15 +16,15 @@ const AnnotationVariants = {
  * Default name of allowed templates
  */
 const TemplateNames = {
-    ANNOTATION: "ox-annotation",
     CHECKLIST: "ox-checklist",
-    QUESTION: "ox-question"
+    QUESTION: "ox-question",
+    SEQUENCE: "ox-sequence"
 }
 
 /**
  * Class to access and control annotations from outside
  */
-class OnirixAnnotations {
+class OnirixAnnotationsModule {
 
     /**
      * Variables
@@ -47,9 +47,9 @@ class OnirixAnnotations {
      * @param   sdk to hear events and perfom actions
      * @param   optional information to control the annotations
      */
-    constructor(embedSdk, params = { persist: false, template: TemplateNames.ANNOTATION, noDatasheets: "There isn't datasheet in this scene." }) {
+    constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't datasheet in this scene." }) {
         this.embedSDK = embedSdk;
-        this.template = params.template ? params.template : TemplateNames.ANNOTATION;
+        this.template = params.template ? params.template : TemplateNames.CHECKLIST;
         this.persist = params.persist ? params.persist : false;
         this.noDatasheets = params.noDatasheets ? params.noDatasheets : "There isn't datasheet in this scene.";
         this.isQuestion = this.template == TemplateNames.QUESTION;
@@ -363,7 +363,7 @@ class OnirixAnnotations {
     }
 }
 
-export default OnirixAnnotations;
+export default OnirixAnnotationsModule;
 
 
 
