@@ -5,7 +5,7 @@
     <title>Onirix Annotations Test</title>
     <script src="https://www.onirix.com/webar/ox-devicemotion.min.js"></script>
     <script type="module" defer>
-        import OnirixAnnotations from "../dist/ox-annotations.esm.js"
+        import OnirixAnnotationsModule from "../dist/ox-annotations-module.esm.js"
         import OnirixEmbedSDK from "https://unpkg.com/@onirix/embed-sdk@1.8.0/dist/ox-embed-sdk.esm.js";
 
         const iframeElement = document.getElementById("visor");
@@ -23,7 +23,7 @@
                 console.log('ELEMENT_CLICK', params);
             });
 
-            const oxAnnotations = new OnirixAnnotations(embedSDK);
+            const oxAnnotations = new OnirixAnnotationsModule(embedSDK);
             oxAnnotations.onActive = (element) => {
                 console.log("onActive ", element);
             }

@@ -1,10 +1,13 @@
 # Onirix Annotations
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
+[![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://docs.onirix.com/modules/onirix-annotations-checklist)
 [![Twitter: onirix](https://img.shields.io/twitter/follow/onirix.svg?style=social)](https://twitter.com/onirix)
 
 Onirix Annotations allows you to display information associated with the elements of an Onirix Studio experience in a convenient and simple way.
 Simply add dasheets to Studio elements and Onirix Annotations will take care of displaying them when the user clicks on them.
+
+If you need help take a look at [our documentation](https://docs.onirix.com/modules/onirix-annotations-checklist).
 
 If you want to know more about datasheets and templates in Onirix Studio, take a look at [our documentation about the Datastore module](https://docs.onirix.com/onirix-studio/datastore).
 
@@ -12,21 +15,21 @@ If you want to know more about datasheets and templates in Onirix Studio, take a
 ## Install
 
 ```sh
-npm install @onirix/annotations
+npm install @onirix/annotations-module
 ```
 
 Include the dependency within the HTML head tag:
 
 ```html
 <head>
-    <script src="https://unpkg.com/@onirix/annotations@1.0.0/dist/ox-annotations.umd.js"/>
+    <script src="https://unpkg.com/@onirix/annotations-module@1.0.0/dist/ox-annotations-module.umd.js"/>
 </head>
 ```
 
 As ESM modules:
 
 ```js
-import OnirixAnnotations from "https://unpkg.com/@onirix/annotations@1.0.0/dist/ox-annotations.esm.js";
+import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@1.0.0/dist/ox-annotations-module.esm.js";
 ```
 
 ## Usage
@@ -35,12 +38,12 @@ To use this library, first, the embedsdk must be initialize and pass it to the c
 
 ```js
 import OnirixEmbedSDK from "https://unpkg.com/@onirix/embed-sdk@1.8.0/dist/ox-embed-sdk.esm.js";
-import OnirixAnnotations from "https://unpkg.com/@onirix/annotations@1.0.0/dist/ox-annotations.esm.js";
+import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@1.0.0/dist/ox-annotations-module.esm.js";
 
 const embedSDK = new OnirixEmbedSDK();
 embedSDK.connect();
 
-const oxAnnotations = new OnirixAnnotations(embedSDK);
+const oxAnnotations = new OnirixAnnotationsModule(embedSDK);
 ```
 
 Onirix Annotations can be configured by adding a second parameter to the constructor:
@@ -52,12 +55,12 @@ const params = {
     noDatasheets: "There isn't datasheet in this scene." 
 };
 
-const oxAnnotations = new OnirixAnnotationsLib(embedSDK, params);
+const oxAnnotations = new OnirixAnnotationsModule(embedSDK, params);
 ```
 
 If **persist** is true browser will remember visit elements next time that scene be loaded. If false (default value) all elements be inactive every time the experience loads.
 
-Onirix Annotations will render only datasheets from **template "ox-annotation"** (default value). If you want user other datasheet's template you have to set template's name here.
+Onirix Annotations will render only datasheets from **template "ox-checklist"** (default value). If you want user other datasheet's template you have to set template's name here.
 
 If no element with datasheets is found, an error message will be displayed. This message can be customized by indicating the text in the **noDatasheets** parameter. If no text is indicated, this will be *There isn't datasheet in this scene.* (default value).
 
@@ -118,7 +121,7 @@ Let's add some code to change the white background of the datasheet and the font
 
 You can make infinite changes to the interface by adding the appropriate CSS selectors. Through your browser's development tools you can explore the names of the css classes used by the library and add your own custom selectors and rules.
 
-## OnirixAnnotations Class
+## OnirixAnnotationsModule Class
 
 ### Methods
 
@@ -157,13 +160,15 @@ oxAnnotations.onVisited = (element) => {
 The constructor accepts essential data for subscribe to embedsdk events:
 
 ```js
-constructor(embedSdk, params = { persist: false, template: TemplateNames.ANNOTATION, noDatasheets: "There isn't datasheet in this scene." });
+constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't datasheet in this scene." });
 ```
 
 - embedSdk: intance of the sdk used in the experience to listen events and perform action in elements.
 - params: Object that indicates if the visited annotations must be stored in browser local storage and name of the template used in the datasheets.
 
 ## Not enough?
+
+If you need help take a look at [our documentation](https://docs.onirix.com/modules/onirix-annotations-checklist).
 
 If you want to make deeper changes you can clone the Onirix Annotations code from our [GitHub repository](https://github.com/onirix-ar/onirix-annotations) and create your own Annotations control.
 
