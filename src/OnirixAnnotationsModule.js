@@ -140,7 +140,7 @@ class OnirixAnnotationsModule {
     async setInnactiveStatus(elements, force = false) {
         if (elements != null) {
             for (const element of elements) {
-                if (!this.annotationPlayed(element?.name) || force) {
+                if (!this.annotationPlayed(element.name ? element.name : element) || force) {
                     await this.embedSDK.setVariant(element.name ? element.name : element,  AnnotationVariants.INNACTIVE);
                 }
             }
