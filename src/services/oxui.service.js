@@ -447,18 +447,16 @@ class OxUIService {
         }
         const content = datasheet.content;
         const question = content[0];
-        const answers = content[2];
-        const answersSplit = answers.answers.split("\n");
         
         const container = document.createElement("div");
         container.classList.add(this.QUESTION_CARD)
         this.getQuestionHeader(container, question.question);
 
-        if (content[1].img != "") {
-            await this.addImage(content[1].img, container, false);
+        if (content[1].image != "") {
+            await this.addImage(content[1].image, container, false);
         }
 
-        this.getAnswers(container, answersSplit)
+        this.getAnswers(container, content)
         
         const cards = document.createElement("div");
         cards.id = this.CARDS;
@@ -504,26 +502,31 @@ class OxUIService {
      * 
      * @internal
      * @param question card
-     * @param answers
+     * @param content
      */
-    getAnswers(container, answersSplit) {
+    getAnswers(container, content) {
         const ul = document.createElement("ul");
-        answersSplit.forEach(ans => {
-            const answer = JSON.parse("{" + ans + "}");
-            const li = document.createElement("li");
-            li.innerHTML = `
-                <span>${answer.answer}</span>
-                <div></div>
-            `;
-            if (answer.correct) {
-                li.classList.add(this.CORRECT)
+        const correct = content[6].answer;
+        for (let i = 2; i < 6; i++) {
+            for (const [key, value] of Object.entries(content[i])) {
+                if (value != "") {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        <span>${value}</span>
+                        <div></div>
+                    `;
+                    if (key == correct) {
+                        li.classList.add(this.CORRECT);
+                    }
+                    li.addEventListener("click", () => {
+                        container.classList.add(this.FINAL_CARD);
+                        this.handleCorrect(li);
+                    })
+                    ul.appendChild(li);
+                }
             }
-            li.addEventListener("click", () => {
-                container.classList.add(this.FINAL_CARD);
-                this.handleCorrect(li);
-            })
-            ul.appendChild(li);
-        })
+            
+        }
         container.appendChild(ul);
     }
 
