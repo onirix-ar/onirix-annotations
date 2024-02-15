@@ -40,6 +40,9 @@ class OxUIService {
     MAX_TOP = 96;
     MIN_TOP = 500;
     MIDDLE_TOP = 250;
+    QUESTION_POSITION = 0;
+    IMG_POSITION = 1;
+    FIRST_ANSWER = 2;
 
     /**
      * Variables
@@ -446,14 +449,14 @@ class OxUIService {
             document.body.removeChild(summary);
         }
         const content = datasheet.content;
-        const question = content[0];
+        const question = content[this.QUESTION_POSITION];
         
         const container = document.createElement("div");
         container.classList.add(this.QUESTION_CARD)
-        this.getQuestionHeader(container, question.question);
+        this.getQuestionHeader(container, Object.values(question)[0]);
 
-        if (content[1].image != "") {
-            await this.addImage(content[1].image, container, false);
+        if (Object.values(content[this.IMG_POSITION])[0] != "") {
+            await this.addImage(Object.values(content[this.IMG_POSITION])[0], container, false);
         }
 
         this.getAnswers(container, content)
@@ -506,8 +509,8 @@ class OxUIService {
      */
     getAnswers(container, content) {
         const ul = document.createElement("ul");
-        const correct = content[6].answer;
-        for (let i = 2; i < 6; i++) {
+        const correct = content[content.length - 1].answer;
+        for (let i = this.FIRST_ANSWER; i < content.length - 1; i++) {
             for (const [key, value] of Object.entries(content[i])) {
                 if (value != "") {
                     const li = document.createElement("li");
