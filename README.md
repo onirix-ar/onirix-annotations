@@ -1,6 +1,6 @@
 # Onirix Annotations
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg?cacheSeconds=2592000)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://docs.onirix.com/modules/onirix-annotations-checklist)
 [![Twitter: onirix](https://img.shields.io/twitter/follow/onirix.svg?style=social)](https://twitter.com/onirix)
 
@@ -9,7 +9,7 @@ Simply add dasheets to Studio elements and Onirix Annotations will take care of 
 
 If you need help take a look at [our documentation](https://docs.onirix.com/modules/onirix-annotations-checklist).
 
-If you want to know more about datasheets and templates in Onirix Studio, take a look at [our documentation about the Datastore module](https://docs.onirix.com/onirix-studio/datastore).
+If you want to know more about data sheets and data structures in Onirix Studio, take a look at [our documentation about the Datastore module](https://docs.onirix.com/onirix-studio/datastore).
 
 
 ## Install
@@ -22,14 +22,14 @@ Include the dependency within the HTML head tag:
 
 ```html
 <head>
-    <script src="https://unpkg.com/@onirix/annotations-module@1.0.0/dist/ox-annotations-module.umd.js"/>
+    <script src="https://unpkg.com/@onirix/annotations-module@2.0.0/dist/ox-annotations-module.umd.js"/>
 </head>
 ```
 
 As ESM modules:
 
 ```js
-import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@1.0.0/dist/ox-annotations-module.esm.js";
+import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@2.0.0/dist/ox-annotations-module.esm.js";
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ To use this library, first, the embedsdk must be initialize and pass it to the c
 
 ```js
 import OnirixEmbedSDK from "https://unpkg.com/@onirix/embed-sdk@1.8.0/dist/ox-embed-sdk.esm.js";
-import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@1.0.0/dist/ox-annotations-module.esm.js";
+import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@2.0.0/dist/ox-annotations-module.esm.js";
 
 const embedSDK = new OnirixEmbedSDK();
 embedSDK.connect();
@@ -51,8 +51,8 @@ Onirix Annotations can be configured by adding a second parameter to the constru
 ```js
 const params = {
     persist: false,
-    template: "custom-template-name",
-    noDatasheets: "There isn't datasheet in this scene." 
+    template: "custom-data-structure-name",
+    noDatasheets: "There isn't data sheet in this scene." 
 };
 
 const oxAnnotations = new OnirixAnnotationsModule(embedSDK, params);
@@ -60,25 +60,29 @@ const oxAnnotations = new OnirixAnnotationsModule(embedSDK, params);
 
 If **persist** is true browser will remember visit elements next time that scene be loaded. If false (default value) all elements be inactive every time the experience loads.
 
-Onirix Annotations will render only datasheets from **template "ox-checklist"** (default value). If you want user other datasheet's template you have to set template's name here.
+Onirix Annotations will render only data sheets from **data structure "ox-checklist"** (default value). If you want user other data sheet's structure you have to set structures's name here.
 
-If no element with datasheets is found, an error message will be displayed. This message can be customized by indicating the text in the **noDatasheets** parameter. If no text is indicated, this will be *There isn't datasheet in this scene.* (default value).
+Onirix Annotations is also designed and prepared for another **data structure: "ox-question"**. When we use this data structure the experience becomes a questionnaire. 
+Through the scene editor you can configure data sheets with questions for each element of the experience.
+Onirix Annotations will take care of displaying the question to the user and process the answer.
 
-If you need more info about datasheets and templates in Onirix Studio, take a look at [our documentation about the Datastore module](https://docs.onirix.com/onirix-studio/datastore).
+If no element with data sheets is found, an error message will be displayed. This message can be customized by indicating the text in the **noDatasheets** parameter. If no text is indicated, this will be *There isn't data sheets in this scene.* (default value).
 
 ## Customize
 
 ### Customizing experience elements
 
-You can use any asset in the Onirix Studio experience elements, but if you want the state of the element to change when the datasheet is displayed you must choose an asset that implements the following variants:
+You can use any asset in the Onirix Studio experience elements, but if you want the state of the element to change when the data sheet is displayed you must choose an asset that implements the following variants:
 
-- "active" will be the variant to be applied when the datasheet of the element is open.
+- "active" will be the variant to be applied when the data sheet of the element is open.
 - "inactive" will be the variant that will be applied when the item's tab is closed and has not been opened before.
-- "visited" will be the variant to be applied when the datasheet of the element is closed and has been previously opened.
+- "visited" will be the variant to be applied when the data sheet of the element is closed and has been previously opened.
+- "correct" will be the variant to be applied when a question is answered successfully.
+- "incorrect" will be the variant to be applied when a question is anwered incorrectly.
 
 If you need help with the variants take a look at [our documentation](https://docs.onirix.com/onirix-studio/assets/3d-models/variants#variants).
 
-If your assets do not have variants do not worry. Onirix Annotions provides you with three functions that you can override to make modifications to the experience by showing/hiding the datasheet.
+If your assets do not have variants do not worry. Onirix Annotions provides you with six functions that you can override to make modifications to the experience by showing/hiding the data sheet or the questions state.
 
 ```js
 oxAnnotations.onActive = (element) => {
@@ -97,19 +101,43 @@ oxAnnotations.onVisited = (element) => {
      * Your code here
      */
 }
+
+oxAnnotations.onCorrect = (element) => {
+    /**
+     * Your code here
+     */
+}
+
+oxAnnotations.onIncorrect = (element) => {
+    /**
+     * Your code here
+     */
+}
+
+oxAnnotations.onFinalize = (summary) => {
+    /**
+     * Your code here
+     */
+}
 ```
 
-The three functions receive as parameter the datasheet element that has been shown/hidden. Use our [EmbedSDK](https://www.npmjs.com/package/@onirix/embed-sdk?activeTab=readme) to make changes to the 3D element.
+The three functions receive as parameter the data sheet element that has been shown/hidden. Use our [EmbedSDK](https://www.npmjs.com/package/@onirix/embed-sdk?activeTab=readme) to make changes to the 3D element.
 
 
 ### Customizing CSS
 
-The body has a css class called ox-annotations and the datasheet element has it's own class called ox-datasheet. On the other hand, the dialog that indicates that there are no datasheets uses the class ox-no-datasheet
+The body has a css class called ox-annotations and the data sheet element has it's own class called ox-datasheet. On the other hand, the dialog that indicates that there are no data sheets uses the class ox-no-datasheet.
+If you are using the questionnaire mode, there are three diferent classes:
+
+- ox-cards: It includes the dialogues for the question and its correction.
+- summary-toggle: The button that shows the summary.
+- ox-summary: The dialog containing the summary.
+
 By employing these selectors, you will be able to customize the style of individual elements under them in the DOM.
 
 To modify the look and feel of the Annotations you can add all the CSS you need to your experience through Onirix Studio's online code editor.
 
-Let's add some code to change the white background of the datasheet and the font.
+Let's add some code to change the white background of the data sheet and the font.
 
 ```css
 .ox-annotations .ox-datasheet {
@@ -119,14 +147,31 @@ Let's add some code to change the white background of the datasheet and the font
 }
 ```
 
+If you are using the questionnaire data structures you can customize the questions and the summary with the following classes:
+
+```css
+.ox-question-card > div {
+    filter: contrast(150%) brightness(105%);
+    background-color: #FABADA;
+    color: #6228a7;
+}
+
+.ox-summary > div {
+    filter: contrast(150%) brightness(105%);
+    background-color: #FABADA;
+    color: #6228a7;
+}
+
+```
+
 You can make infinite changes to the interface by adding the appropriate CSS selectors. Through your browser's development tools you can explore the names of the css classes used by the library and add your own custom selectors and rules.
 
 ## OnirixAnnotationsModule Class
 
 ### Methods
 
-This class includes three listener triggering client actions.
-When a element is clicked and it has a correct datasheet an event will be launched and you can hear it in your code in this way:
+This class includes six listener triggering client actions.
+When a element is clicked and it has a correct data sheet an event will be launched and you can hear it in your code in this way:
 
 ```js
 oxAnnotations.onActive = (element) => {
@@ -136,7 +181,7 @@ oxAnnotations.onActive = (element) => {
 }
 ```
 
-On the other hand, when the datasheet is closed two events can be launched:
+On the other hand, when the data sheet is closed two events can be launched:
 - onInactive: when the element had already been visited.
 - onVisited: when the element had not been visited.
 
@@ -155,16 +200,43 @@ oxAnnotations.onVisited = (element) => {
 }
 ```
 
+When the mode is questionnaire three events are launched:
+
+- onCorrect: when a question is answered correctly.
+- onIncorrect: when a question is answered incorrectly.
+- onFinalize: when all questions are answered.
+
+To hear them you can do this is yout code:
+```js
+oxAnnotations.onCorrect = (element) => {
+    /**
+     * Your code here
+     */
+}
+
+oxAnnotations.onIncorrect = (element) => {
+    /**
+     * Your code here
+     */
+}
+
+oxAnnotations.onFinalize = (summary) => {
+    /**
+     * Your code here
+     */
+}
+```
+
 #### Constructor
 
 The constructor accepts essential data for subscribe to embedsdk events:
 
 ```js
-constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't datasheet in this scene." });
+constructor(embedSdk, params = { persist: false, template: "ox-checklist", noDatasheets: "There isn't data sheets in this scene." });
 ```
 
 - embedSdk: intance of the sdk used in the experience to listen events and perform action in elements.
-- params: Object that indicates if the visited annotations must be stored in browser local storage and name of the template used in the datasheets.
+- params: Object that indicates if the visited annotations must be stored in browser local storage and name of the data structure used in the data sheets.
 
 ## Not enough?
 

@@ -7,11 +7,13 @@ import OnirixEmbedSDK from "@onirix/embed-sdk/dist/ox-embed-sdk.esm.js";
 const AnnotationVariants = {
     ACTIVE: "active",
     INNACTIVE: "inactive",
-    VISITED: "visited"
+    VISITED: "visited",
+    CORRECT: "correct",
+    INCORRECT: "incorrect"
 }
 
 /**
- * Default name of allowed templates
+ * Default name of allowed data structures
  */
 const TemplateNames = {
     CHECKLIST: "ox-checklist",
@@ -32,10 +34,12 @@ class OnirixAnnotationsModule {
     embedSDK = null;
     template = null;
     persist = false;
-    visitedAnnotations = [];
+    annotationsPlayed = [];
     currentElement = null;
-    annotationAlreadyVisited = false;
+    annotationAlreadyPlayed = false;
     noDatasheets = "";
+    isQuestion = false;
+    totalQuestions = 0;
 
     /**
      * Constructor.
@@ -43,12 +47,13 @@ class OnirixAnnotationsModule {
      * @param   sdk to hear events and perfom actions
      * @param   optional information to control the annotations
      */
-    constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't datasheet in this scene." }) {
-        this.uiService = new OxUIService();
+    constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't data sheets in this scene." }) {
         this.embedSDK = embedSdk;
         this.template = params.template ? params.template : TemplateNames.CHECKLIST;
         this.persist = params.persist ? params.persist : false;
-        this.noDatasheets = params.noDatasheets ? params.noDatasheets : "There isn't datasheet in this scene.";
+        this.noDatasheets = params.noDatasheets ? params.noDatasheets : "There isn't data sheet in this scene.";
+        this.isQuestion = this.template == TemplateNames.QUESTION;
+        this.uiService = new OxUIService(this.isQuestion);
 
         this.uiService.onClose = async () => {
             await this.manageAnnotationsStates();
@@ -59,10 +64,15 @@ class OnirixAnnotationsModule {
         }
         
         this.embedSDK.subscribe(OnirixEmbedSDK.Events.SCENE_LOAD_END, async (params) => {
+            if (this.isQuestion) {
+                this.uiService.addSummaryButton();
+            }
             const elements = params.elements;
-            const hasDatasheets = elements.find(element => element.datasheets.find(datasheet => datasheet.template.name == this.template)) != null;
-            if (!hasDatasheets) {
+            const datasheets = elements.filter(element => element.datasheets.find(datasheet => datasheet.template.name == this.template))
+            if (datasheets.length == 0) {
                 this.uiService.showNoDatasheetsError(this.noDatasheets);
+            } else {
+                this.totalQuestions = datasheets.length;
             }
             await this.init(params);
         });
@@ -70,6 +80,10 @@ class OnirixAnnotationsModule {
         this.embedSDK.subscribe(OnirixEmbedSDK.Events.ELEMENT_CLICK, async (params) => {
             this.handleClick(params);
         });
+
+        if (this.isQuestion) {
+            this.handleQuestionActions();
+        }
 
     }
 
@@ -80,12 +94,12 @@ class OnirixAnnotationsModule {
      * @param   information about the scene 
      */
     async init(params) {
-        this.STORAGE_NAME = "ox-annotations-" + params.oid;
+        this.STORAGE_NAME = "ox-annotations-" + params.oid + "-" + this.template;
             
         if (this.persist) {
-            this.visitedAnnotations = localStorage.getItem(this.STORAGE_NAME) ? JSON.parse(localStorage.getItem(this.STORAGE_NAME)) : [];
-            if (this.visitedAnnotations.length > 0) {
-                for (const annotation of this.visitedAnnotations) {
+            this.annotationsPlayed = localStorage.getItem(this.STORAGE_NAME) ? JSON.parse(localStorage.getItem(this.STORAGE_NAME)) : [];
+            if (this.annotationsPlayed.length > 0) {
+                for (const annotation of this.annotationsPlayed) {
                     this.currentElement = annotation;
                     await this.manageAnnotationsStates();
                 }
@@ -105,12 +119,15 @@ class OnirixAnnotationsModule {
     async handleClick(params) {
         const datasheets = params.datasheets;
         if (datasheets.length > 0 && datasheets.find(datasheet => datasheet.template.name == this.template)){
+            if (this.isQuestion && this.currentElement != null) {
+                return;
+            }
             if (this.currentElement != null) {
                 this.uiService.closeSheet(false);
                 await this.manageAnnotationsStates();
             }
             this.currentElement = params.name;
-            await this.openDatasheet(params);
+            await this.open(params);
         }
     }
 
@@ -120,11 +137,11 @@ class OnirixAnnotationsModule {
      * @internal
      * @param 3D elements 
      */
-    async setInnactiveStatus(elements) {
+    async setInnactiveStatus(elements, force = false) {
         if (elements != null) {
             for (const element of elements) {
-                if (!this.visitedAnnotations?.includes(element.name)) {
-                    await this.embedSDK.setVariant(element.name,  AnnotationVariants.INNACTIVE);
+                if (!this.annotationPlayed(element.name ? element.name : element) || force) {
+                    await this.embedSDK.setVariant(element.name ? element.name : element,  AnnotationVariants.INNACTIVE);
                 }
             }
         }
@@ -136,13 +153,18 @@ class OnirixAnnotationsModule {
      * @internal
      */
     async manageAnnotationsStates() {
-        if (this.visitedAnnotations.includes(this.currentElement) && this.annotationAlreadyVisited) {
+        if (this.annotationPlayed(this.currentElement) && this.annotationAlreadyPlayed) {
             this.launchOnInactive();
         } else {
             this.launchOnVisited();
         }
-        await this.embedSDK.setVariant(this.currentElement, AnnotationVariants.VISITED);
-        this.updateVisitedAnnotations();
+        if (this.isQuestion) {
+            await this.embedSDK.setVariant(this.currentElement.name, this.currentElement.correct ? AnnotationVariants.CORRECT : AnnotationVariants.INCORRECT);
+        } else {
+            await this.embedSDK.setVariant(this.currentElement, AnnotationVariants.VISITED);
+        }
+
+        this.updateAnnotationsPlayed();
         this.currentElement = null;
     }
 
@@ -151,13 +173,16 @@ class OnirixAnnotationsModule {
      * 
      * @internal
      */
-    updateVisitedAnnotations() {
-        if (!this.visitedAnnotations?.includes(this.currentElement)) {
-            this.visitedAnnotations.push(this.currentElement);
+    updateAnnotationsPlayed(correct = null) {
+        if (!this.annotationPlayed(this.currentElement)) {
+            if (correct != null) {
+                this.currentElement = {name: this.currentElement, correct: correct};
+            }
+            this.annotationsPlayed.push(this.currentElement);
         }
 
         if (this.persist) {
-            localStorage.setItem(this.STORAGE_NAME, JSON.stringify(this.visitedAnnotations));
+            localStorage.setItem(this.STORAGE_NAME, JSON.stringify(this.annotationsPlayed));
         }        
     }
 
@@ -189,13 +214,23 @@ class OnirixAnnotationsModule {
      * @internal
      * @param   information about the 3D element clicked
      */
-    async openDatasheet(params) {
-        this.annotationAlreadyVisited = this.visitedAnnotations.includes(this.currentElement);
-        this.updateVisitedAnnotations();
-        await this.embedSDK.setVariant(params.name, AnnotationVariants.ACTIVE);
-        this.uiService.openDatasheet(params.datasheets.filter(datasheet => datasheet.template.name == this.template)[0]);
-        if (this.onActive) {
-            this.onActive(params.name);
+    async open(params) {
+        this.annotationAlreadyPlayed = this.annotationPlayed(this.currentElement);
+        if (this.isQuestion && this.annotationAlreadyPlayed) {
+            this.currentElement = null;
+            return;
+        }
+        else if (this.isQuestion && !this.annotationAlreadyPlayed) {
+            await this.embedSDK.setVariant(params.name, AnnotationVariants.ACTIVE);
+            this.uiService.openQuestion(params.datasheets.filter(datasheet => datasheet.template.name == this.template)[0]);
+        } else {
+            this.updateAnnotationsPlayed();
+            await this.embedSDK.setVariant(params.name, AnnotationVariants.ACTIVE);
+            this.uiService.openDatasheet(params.datasheets.filter(datasheet => datasheet.template.name == this.template)[0]);
+                
+            if (this.onActive) {
+                this.onActive(params.name);
+            }
         }
     }
 
@@ -208,6 +243,123 @@ class OnirixAnnotationsModule {
      */
     async getImage(oid) {
         return await this.embedSDK.getAssetImage(oid);
+    }
+
+    /**
+     * Launch onCorrect custom event.
+     * 
+     * @internal
+     */
+    launchOnCorrect() {
+        if (this.onCorrect) {
+            this.onCorrect(this.currentElement);
+        }
+    }
+
+    /**
+     * Launch onIncorrect custom event.
+     * 
+     * @internal
+     */
+    launchOnIncorrect() {
+        if (this.onIncorrect) {
+            this.onIncorrect(this.currentElement);
+        }
+    }
+
+    /**
+     * Checks if the annotation is played or not
+     * 
+     * @internal
+     * @param annotation name 
+     * @returns boolean
+     */
+    annotationPlayed(name) {
+        if (this.isQuestion) {
+            return this.annotationsPlayed?.find(anno => anno.name == name || anno.name == name.name) != null;
+        } else {
+            return this.annotationsPlayed?.includes(name)
+        }
+    }
+
+    /**
+     * Get information about the questions and it's states
+     * 
+     * @internal
+     * @returns object
+     */
+    getSummary() {
+        return {
+            total: this.totalQuestions,
+            answeredCorrect: this.annotationsPlayed.filter(ann => ann.correct).length,
+            answeredFail: this.annotationsPlayed.filter(ann => !ann.correct).length
+        }
+    }
+
+    /**
+     * Launch onFinalize custom event.
+     * 
+     * @internal
+     */
+    launchOnFinalize(summary) {
+        if (this.onFinalize) {
+            this.onFinalize(summary);
+        }
+    }
+
+    /**
+     * Reset the questions
+     * 
+     * @internal
+     */
+    async tryAgain() {
+        this.currentElement = null;
+        this.setInnactiveStatus(this.annotationsPlayed, true);
+        this.annotationsPlayed = [];
+        this.annotationAlreadyPlayed = false;
+        if (this.persist) {
+            localStorage.removeItem(this.STORAGE_NAME);
+        }
+    }
+
+    /**
+     * Hear actions from the UI
+     * 
+     * @internal
+     */
+    handleQuestionActions() {
+        this.uiService.onCorrect = async () => {
+            this.updateAnnotationsPlayed(true)
+            this.launchOnCorrect();
+            await this.manageAnnotationsStates();
+            this.currentElement = null;
+        }
+
+        this.uiService.onIncorrect = async () => {
+            this.updateAnnotationsPlayed(false)
+            this.launchOnIncorrect();
+            await this.manageAnnotationsStates();
+            this.currentElement = null;
+        }
+
+        this.uiService.onGetSummary = () => {
+            return this.getSummary();
+        }
+
+        this.uiService.onFinalize = (summary) => {
+            this.launchOnFinalize(summary);
+        }
+
+        this.uiService.onTryAgain = () => {
+            this.tryAgain();
+        }
+
+        this.uiService.onAbort = async () => {
+            if (this.currentElement) {
+                await this.setInnactiveStatus([this.currentElement])
+                this.currentElement = null;
+            }
+        }
     }
 }
 

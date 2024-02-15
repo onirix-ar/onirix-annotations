@@ -21,7 +21,17 @@ class OxUIService {
     VERTICAL = "ox-image-preview--vertical";
     EXPAND = "ox-expand";
     RICH_FIELD = "ox-rich-field";
-    NO_DATASHEETS = "ox-no-datasheet"
+    NO_DATASHEETS = "ox-no-datasheet";
+    CARDS = "ox-cards";
+    SUMMARY = "ox-summary";
+    SUMMARY_TOGGLE = "summary-toggle";
+    QUESTION_CARD = "ox-question-card";
+    CORRECT = "ox-correct";
+    SUCCESS = "ox-success";
+    FAIL = "ox-fail";
+    SUMMARY_TOGGLE_ACTIVE = "summary-toggle--active"
+    SUMMARY_FINALLY = "ox-summary--finally";
+    FINAL_CARD = "ox-question-card--finally";
 
     /**
      * Constants
@@ -30,6 +40,9 @@ class OxUIService {
     MAX_TOP = 96;
     MIN_TOP = 500;
     MIDDLE_TOP = 250;
+    QUESTION_POSITION = 0;
+    IMG_POSITION = 1;
+    FIRST_ANSWER = 2;
 
     /**
      * Variables
@@ -330,17 +343,21 @@ class OxUIService {
      * @internal
      * @param   identifiedr of the image 
      * @param   sheet content DOM element
+     * @param   add open full handle
      */
-    async addImage(oid, contentElement) {
+    async addImage(oid, contentElement, showFull = true) {
         const blob = await this.onGetImage(oid);
         const url = URL.createObjectURL(blob);
         const div = document.createElement("div");
         div.style.backgroundImage = `url(${url})`;
+        div.classList.add("ox-image");
         contentElement.appendChild(div);
-        const full = document.createElement("img");
-        full.classList.add(this.EXPAND);
-        this.handlerFullOpenImage(full, url);
-        contentElement.appendChild(full);        
+        if (showFull) {
+            const full = document.createElement("img");
+            full.classList.add(this.EXPAND);
+            this.handlerFullOpenImage(full, url);
+            contentElement.appendChild(full); 
+        }     
     }
 
     /**
@@ -404,7 +421,7 @@ class OxUIService {
     }
 
     /**
-     * Show a dialog indicating no templates have been found
+     * Show a dialog indicating no data sheets have been found
      * 
      * @param text to show 
      */
@@ -419,6 +436,311 @@ class OxUIService {
             document.body.removeChild(div);
         });
         document.body.appendChild(div);
+    }
+
+    /**
+     * Show the cuestion dialog
+     * 
+     * @param  datasheet info
+     */
+    async openQuestion(datasheet) {
+        const summary = document.getElementById(this.SUMMARY);
+        if (summary != null) {
+            document.body.removeChild(summary);
+        }
+        const content = datasheet.content;
+        const question = content[this.QUESTION_POSITION];
+        
+        const container = document.createElement("div");
+        container.classList.add(this.QUESTION_CARD)
+        this.getQuestionHeader(container, Object.values(question)[0]);
+
+        if (Object.values(content[this.IMG_POSITION])[0] != "") {
+            await this.addImage(Object.values(content[this.IMG_POSITION])[0], container, false);
+        }
+
+        this.getAnswers(container, content)
+        
+        const cards = document.createElement("div");
+        cards.id = this.CARDS;
+        cards.classList.add(this.CARDS);
+        container.getElementsByTagName("img")[0].addEventListener("click", (event) => {
+            document.body.removeChild(cards);
+            this.onAbort();
+            const summary = this.onGetSummary();
+            if (summary.total == summary.answeredCorrect + summary.answeredFail) {
+                if (this.onFinalize) {
+                    this.onFinalize(summary);
+                }
+                document.getElementById(this.SUMMARY_TOGGLE).classList.add(this.SUMMARY_TOGGLE_ACTIVE);
+                this.addSummary(summary, true);
+            }
+        });
+        cards.appendChild(container);
+        document.body.appendChild(cards);
+    }
+
+    /**
+     * Add header to question dialog
+     * 
+     * @internal
+     * @param question card 
+     * @param question
+     */
+    getQuestionHeader(container, question) {
+        container.innerHTML = `
+            <div>
+                <div>
+                    <div></div>
+                    <span>Question</span>
+                </div>
+                <img />
+            </div>
+            <p>${question}</p>
+        `;
+    }
+
+    /**
+     * Add answers to the question card
+     * 
+     * @internal
+     * @param question card
+     * @param content
+     */
+    getAnswers(container, content) {
+        const ul = document.createElement("ul");
+        const correct = content[content.length - 1].answer;
+        for (let i = this.FIRST_ANSWER; i < content.length - 1; i++) {
+            for (const [key, value] of Object.entries(content[i])) {
+                if (value != "") {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        <span>${value}</span>
+                        <div></div>
+                    `;
+                    if (key == correct) {
+                        li.classList.add(this.CORRECT);
+                    }
+                    li.addEventListener("click", () => {
+                        container.classList.add(this.FINAL_CARD);
+                        this.handleCorrect(li);
+                    })
+                    ul.appendChild(li);
+                }
+            }
+            
+        }
+        container.appendChild(ul);
+    }
+
+    /**
+     * Determinates if the selected answer is correct or not
+     * 
+     * @internal
+     * @param answer component 
+     */
+    handleCorrect(li) {
+        const isCorrect = li.classList.contains(this.CORRECT);
+        
+        if (isCorrect) {
+            this.showCorrect(li);
+        } else {
+            this.showFail(li);
+        }
+    }
+
+    /**
+     * Mark answer as correct
+     * 
+     * @internal
+     * @param   answer element
+     */
+    showCorrect(li) {
+        li.classList.add(this.SUCCESS);
+        if (this.onCorrect) {
+            this.onCorrect();
+        }
+
+    }
+
+    /**
+     * Mark the correct and incorrect answer
+     * 
+     * @internal
+     * @param   answer element
+     */
+    showFail(li) {
+        li.classList.add(this.FAIL);
+        const cards = document.getElementById(this.CARDS);
+        const card = cards.getElementsByClassName(this.QUESTION_CARD)[0];
+        card.classList.add(this.FAIL);
+
+        if (this.onIncorrect) {
+            this.onIncorrect();
+        }
+
+    }
+
+    /**
+     * Add summary button to show info about the questions
+     */
+    addSummaryButton() {
+        const div = document.createElement("div");
+        div.classList.add(this.SUMMARY_TOGGLE);
+        div.id = this.SUMMARY_TOGGLE;
+        div.addEventListener("click" , () => {
+            if (div.classList.contains(this.SUMMARY_TOGGLE_ACTIVE)) {
+                this.closeSummary();
+            } else {
+                const summary = this.onGetSummary();
+                this.addSummary(summary, summary.total == summary.answeredCorrect + summary.answeredFail);
+                div.classList.add(this.SUMMARY_TOGGLE_ACTIVE);
+            }
+            
+        });
+        document.body.appendChild(div);
+    }
+
+    /**
+     * Process summary data and show it
+     * 
+     * @internal
+     * @param summary information
+     * @param   show final resume
+     */
+    addSummary(summary, final) {
+        const div = document.createElement("div");
+        div.classList.add(this.SUMMARY);
+        div.id = this.SUMMARY;
+        const ansCorrectPercentage = (summary.answeredCorrect / summary.total) * 100;
+        const ansPending = summary.total - (summary.answeredCorrect + summary.answeredFail);
+        div.innerHTML = `
+        <div>
+            ${this.getSummaryHeader(ansCorrectPercentage)}
+            <div>
+                <span>Questions</span>
+                <span>${summary.total - ansPending}/${summary.total}</span>
+            </div>
+            ${this.getSummaryBody(summary.answeredCorrect, summary.answeredFail, ansPending)}
+        </div>
+        `;
+
+        if (final) {
+            div.classList.add(this.SUMMARY_FINALLY)
+            const resume = this.getSummaryFooter(ansCorrectPercentage);
+            div.appendChild(resume);
+        }
+            
+        div.getElementsByTagName("img")[0].addEventListener("click", (event) => {
+            this.closeSummary();
+        });
+        document.body.appendChild(div);
+    }
+
+    /**
+     * Creates summary header
+     * 
+     * @internal
+     * @param percebtage of answered questions
+     * @returns html
+     */
+    getSummaryHeader(ansCorrectPercentage) {
+        return `
+        <div>
+            <div>
+                <div></div>
+                <span>Summary</span>
+            </div>
+            <div>
+                <span>${ansCorrectPercentage}%</span>
+                <div></div>
+                <img />
+            </div>
+        </div>`;
+    }
+
+    /**
+     * Creates summary body
+     * 
+     * @internal
+     * @param number of correct answered questions
+     * @param number of fail answered questions
+     * @param number of pending questions
+     * @returns html
+     */
+    getSummaryBody(correct, fail, pending) {
+        return `
+        <div>
+            <div>
+                <div>
+                    <div></div>
+                    <span>Correct</span>
+                </div>
+                <span>${correct}</span>
+            </div>
+            <div>
+                <div>
+                    <div></div>
+                    <span>Incorrect</span>
+                </div>
+                <span>${fail}</span>
+            </div>
+            <div>
+                <div>
+                    <div>?</div>
+                    <span>Without answering</span>
+                </div>
+                <span>${pending}</span>
+            </div>
+        </div>
+        `;
+    }
+
+    /**
+     * Creates summary footer
+     * 
+     * @internal
+     * @param percentage of answered questions
+     * @returns html
+     */
+    getSummaryFooter(ansCorrectPercentage) {
+        const resume = document.createElement("div");
+        resume.innerHTML = `
+            <span>All questions answered!</span>
+            <div>
+                <span>${ansCorrectPercentage}%</span>
+                <div></div>
+            </div>
+            <button>RESTART QUESTIONS</button>
+        `;
+        resume.getElementsByTagName("button")[0].addEventListener("click", (event) => {
+            this.tryAgain();
+            this.closeSummary();
+        });
+        return resume;
+    }
+
+    /**
+     * Hide summary dialog
+     * 
+     * @internal
+     */
+    closeSummary() {
+        const toggle = document.getElementById(this.SUMMARY_TOGGLE);
+        const summary = document.getElementById(this.SUMMARY);
+        toggle.classList.remove(this.SUMMARY_TOGGLE_ACTIVE);
+        document.body.removeChild(summary);
+    }
+
+    /**
+     * Launch try again event
+     * 
+     * @internal
+     */
+    tryAgain() {
+        if (this.onTryAgain) {
+            this.onTryAgain();
+        }
     }
 }
 
