@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Onirix Annotations - Question Test</title>
+    <script src="https://www.onirix.com/webar/ox-devicemotion.min.js"></script>
+    <script type="module" defer>
+        import OnirixAnnotationsModule from "../dist/ox-annotations-module.esm.js"
+        import OnirixEmbedSDK from "https://unpkg.com/@onirix/embed-sdk@1.8.0/dist/ox-embed-sdk.esm.js";
+
+        const iframeElement = document.getElementById("visor");
+
+        const embedSDK = new OnirixEmbedSDK(iframeElement);
+        
+        window.addEventListener('load', () => {
+            embedSDK.connect();
+
+            embedSDK.subscribe(OnirixEmbedSDK.Events.SCENE_LOAD_END, (params) => {
+                console.log('SCENE_LOAD_END', params);
+            });
+
+            embedSDK.subscribe(OnirixEmbedSDK.Events.ELEMENT_CLICK, (params) => {
+                console.log('ELEMENT_CLICK', params);
+            });
+
+            const oxAnnotations = new OnirixAnnotationsModule(embedSDK, {template: "ox-question"});
+
+            oxAnnotations.onActive = (element) => {
+                console.log("onActive ", element);
+            }
+
+            oxAnnotations.onInactive = (element) => {
+                console.log("onInactive ", element);
+            }
+
+            oxAnnotations.onVisited = (element) => {
+                console.log("onVisited ", element);
+            }
+            
+            oxAnnotations.onCorrect = (element) => {
+                console.log("onCorrect ", element);
+            }
+
+            oxAnnotations.onIncorrect = (element) => {
+                console.log("onIncorrect ", element);
+            }
+
+            oxAnnotations.onFinalize = (summary) => {
+                console.log("onFinalize ", summary);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="ox-custom-html">
+        <h1>Onirix Annotation Question Test</h1>
+    </div>
+
+    <iframe 
+        id="visor" style="width:100%;height:80vh; display:block;border:3px solid black;border-radius: 10px;" 
+        src="https://studio.onirix.com/projects/08fa9fde18c0400b905b77eea2c87b8f/webar?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwNjk1LCJwcm9qZWN0SWQiOjcwMTczLCJyb2xlIjozLCJpYXQiOjE3MDgwMDY3NzV9.wevIZW2035gu_u31t_mwZ_hO4RtiCP70Y360c6OPlZA&background=alpha&preview=false&hide_controls=false&ar_button=false"
+        allow="camera;gyroscope;accelerometer;magnetometer;fullscreen;xr-spatial-tracking;geolocation;"></iframe>
+</body>
+</html>

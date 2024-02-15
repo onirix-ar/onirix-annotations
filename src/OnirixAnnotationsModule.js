@@ -13,7 +13,7 @@ const AnnotationVariants = {
 }
 
 /**
- * Default name of allowed templates
+ * Default name of allowed data structures
  */
 const TemplateNames = {
     CHECKLIST: "ox-checklist",
@@ -47,11 +47,11 @@ class OnirixAnnotationsModule {
      * @param   sdk to hear events and perfom actions
      * @param   optional information to control the annotations
      */
-    constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't datasheet in this scene." }) {
+    constructor(embedSdk, params = { persist: false, template: TemplateNames.CHECKLIST, noDatasheets: "There isn't data sheets in this scene." }) {
         this.embedSDK = embedSdk;
         this.template = params.template ? params.template : TemplateNames.CHECKLIST;
         this.persist = params.persist ? params.persist : false;
-        this.noDatasheets = params.noDatasheets ? params.noDatasheets : "There isn't datasheet in this scene.";
+        this.noDatasheets = params.noDatasheets ? params.noDatasheets : "There isn't data sheet in this scene.";
         this.isQuestion = this.template == TemplateNames.QUESTION;
         this.uiService = new OxUIService(this.isQuestion);
 

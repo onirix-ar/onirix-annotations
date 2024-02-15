@@ -421,7 +421,7 @@ class OxUIService {
     }
 
     /**
-     * Show a dialog indicating no templates have been found
+     * Show a dialog indicating no data sheets have been found
      * 
      * @param text to show 
      */
