@@ -612,7 +612,7 @@ class OxUIService {
         const div = document.createElement("div");
         div.classList.add(this.SUMMARY);
         div.id = this.SUMMARY;
-        const ansCorrectPercentage = (summary.answeredCorrect / summary.total) * 100;
+        const ansCorrectPercentage = (summary.answeredCorrect / summary.total).toFixed(4) * 100;
         const ansPending = summary.total - (summary.answeredCorrect + summary.answeredFail);
         div.innerHTML = `
         <div>
