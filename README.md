@@ -1,13 +1,20 @@
 # Onirix Annotations
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg?cacheSeconds=2592000)
-[![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://docs.onirix.com/modules/onirix-annotations-checklist)
+![Version](https://img.shields.io/badge/version-2.0.1-blue.svg?cacheSeconds=2592000)
 [![Twitter: onirix](https://img.shields.io/twitter/follow/onirix.svg?style=social)](https://twitter.com/onirix)
 
 Onirix Annotations allows you to display information associated with the elements of an Onirix Studio experience in a convenient and simple way.
 Simply add dasheets to Studio elements and Onirix Annotations will take care of displaying them when the user clicks on them.
 
-If you need help take a look at [our documentation](https://docs.onirix.com/modules/onirix-annotations-checklist).
+Onirix Annotations has several modes of operation depending on the data structure you use in your experience. 
+
+[The **ox-checklist** data structure](https://docs.onirix.com/modules/onirix-annotations-checklist) allows us to attach visual cues to your elements in your AR experiences. These cues can be used to mark areas of a digital twin, or areas of interest in a space, for example.
+
+[The **ox-question** data structure](https://docs.onirix.com/modules/onirix-annotations-questions) allows us to attach questions about the elements they are highlighting in the 3D model or Space, perfect for training modules in installations, products, digital twins, scurity dynamics, etc. It also includes a summary component, that can be consulted to review the general status of the test in progress (amount of answers, percentage of success).
+
+
+Through the scene editor you can configure data sheets with questions for each element of the experience.
+Onirix Annotations will take care of displaying the question to the user and process the answer.
 
 If you want to know more about data sheets and data structures in Onirix Studio, take a look at [our documentation about the Datastore module](https://docs.onirix.com/onirix-studio/datastore).
 
@@ -60,13 +67,39 @@ const oxAnnotations = new OnirixAnnotationsModule(embedSDK, params);
 
 If **persist** is true browser will remember visit elements next time that scene be loaded. If false (default value) all elements be inactive every time the experience loads.
 
-Onirix Annotations will render only data sheets from **data structure "ox-checklist"** (default value). If you want user other data sheet's structure you have to set structures's name here.
-
-Onirix Annotations is also designed and prepared for another **data structure: "ox-question"**. When we use this data structure the experience becomes a questionnaire. 
-Through the scene editor you can configure data sheets with questions for each element of the experience.
-Onirix Annotations will take care of displaying the question to the user and process the answer.
+The **template** parameter allows you to indicate to Onirix Annotations the data structure it will find in your experience. It currently supports two predefined data structures.
 
 If no element with data sheets is found, an error message will be displayed. This message can be customized by indicating the text in the **noDatasheets** parameter. If no text is indicated, this will be *There isn't data sheets in this scene.* (default value).
+
+### Predefined data structures
+
+#### Onirix Checklist
+
+To use this mode your experience data sheets must use the data structure **ox-checklist**. Remember that in this mode will render only data sheets from **data structure "ox-checklist"** (default value).
+
+To initialize Onirix Annotations in checklist mode, simply do not specify the data structure of your experience datasheets (this is the default option).
+
+```js
+// Default option
+const oxAnnotations = new OnirixAnnotationsModule(embedSDK, params);
+
+// Setting the template name
+const oxAnnotations = new OnirixAnnotationsModule(embedSDK, {template: 'ox-checklist'});
+```
+
+Check our [documentation](https://docs.onirix.com/modules/onirix-annotations-checklist) to know more about **ox-checklist** mode
+
+#### Onirix Question
+
+To use this mode your experience data sheets must use the data structure **ox-question**.
+
+```js
+// Setting the template name
+const oxAnnotations = new OnirixAnnotationsModule(embedSDK, {template: 'ox-question'});
+
+```
+
+Check our [documentation](https://docs.onirix.com/modules/onirix-annotations-questions) to know more about **ox-question** mode
 
 ## Customize
 
@@ -240,7 +273,12 @@ constructor(embedSdk, params = { persist: false, template: "ox-checklist", noDat
 
 ## Not enough?
 
-If you need help take a look at [our documentation](https://docs.onirix.com/modules/onirix-annotations-checklist).
+If you need help take a look at our documentation about:
+
+- ["ox-checklist" mode](https://docs.onirix.com/modules/onirix-annotations-checklist).
+- ["ox-question" mode](https://docs.onirix.com/modules/onirix-annotations-questions).
+- [Datastore module (data structures and data sheets)](https://docs.onirix.com/onirix-studio/datastore).
+
 
 If you want to make deeper changes you can clone the Onirix Annotations code from our [GitHub repository](https://github.com/onirix-ar/onirix-annotations) and create your own Annotations control.
 
