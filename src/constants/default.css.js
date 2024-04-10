@@ -23,6 +23,10 @@ const DEFAULT_CSS = `
     font-family: "Open Sans";
 }
 
+.ox-datasheet #webar-context-button, .ox-annotations #webar-context-button {
+    display: none !important;
+}
+
 .ox-datasheet {
     position: fixed;
     bottom: 0;
@@ -34,6 +38,7 @@ const DEFAULT_CSS = `
     display: block;
     -webkit-animation: fadeIn 1s;
     animation: fadeIn 1s;
+    z-index: 999;
 }
 
 
@@ -206,10 +211,6 @@ const DEFAULT_CSS = `
     background-color: rgba(33, 31, 31, 0.59);
 }
 
-.ox-cards {
-    max-height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-}
-
 .ox-question-card, .ox-summary > div {
     margin: 0 20px;
     padding: 20px 20px 20px;
@@ -221,10 +222,10 @@ const DEFAULT_CSS = `
 }
 
 .ox-question-card {
-    margin-top: calc(20px + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+    max-height: calc(100% - 80px - env(safe-area-inset-top));
+    margin-top: calc(20px + env(safe-area-inset-top));
+    margin-bottom: calc(20px + env(safe-area-inset-bottom));
     overflow-y: scroll;
-    max-height: -webkit-fill-available;
-    margin-bottom: calc(20px - env(safe-area-inset-bottom));
 }
 
 .ox-question-card > div:first-child, .ox-summary > div > div:first-child {
