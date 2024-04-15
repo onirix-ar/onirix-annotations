@@ -40,6 +40,8 @@ class OnirixAnnotationsModule {
     noDatasheets = "";
     isQuestion = false;
     totalQuestions = 0;
+    previousClicked = false;
+    timeout = null;
 
     /**
      * Constructor.
@@ -62,6 +64,14 @@ class OnirixAnnotationsModule {
         this.uiService.onGetImage = async (oid) => {
             return await this.getImage(oid);
         }
+
+        this.uiService.onClick = () => {
+            clearTimeout(this.timeout);
+            this.previousClicked = true;
+            this.timeout = setTimeout(() => {
+                this.previousClicked = false;
+            }, 600);
+        }
         
         this.embedSDK.subscribe(OnirixEmbedSDK.Events.SCENE_LOAD_END, async (params) => {
             if (this.isQuestion) {
@@ -78,7 +88,7 @@ class OnirixAnnotationsModule {
         });
 
         this.embedSDK.subscribe(OnirixEmbedSDK.Events.ELEMENT_CLICK, async (params) => {
-            this.handleClick(params);
+            if (!this.previousClicked) this.handleClick(params);
         });
 
         if (this.isQuestion) {

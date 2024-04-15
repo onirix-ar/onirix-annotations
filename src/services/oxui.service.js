@@ -100,10 +100,12 @@ class OxUIService {
                 <div></div>
             </div>
         `;
+        sheet.addEventListener("click", (event) => {
+            this.handleClick(event);
+        });
         sheet.getElementsByTagName("div")[0].getElementsByTagName("img")[1].addEventListener("click", (event) => {
-            event.preventDefault();
-            event.stopPropagation();
             this.closeSheet();
+            this.handleClick(event);
         });
         sheet.getElementsByTagName("div")[0].getElementsByTagName("img")[0].addEventListener("click", (event) => this.openAllSheet(event));
         this.createDatasheetElements(sheet, datasheet);
@@ -167,8 +169,6 @@ class OxUIService {
      * @internal
      */
     openAllSheet(event) {
-        event.preventDefault();
-        event.stopPropagation();
         const sheet = document.getElementsByClassName(this.SHEET)[0];
         if (sheet.classList.contains(this.OPENED)) {
             sheet.classList.remove(this.OPENED);
@@ -180,6 +180,7 @@ class OxUIService {
         } else {
             sheet.classList.add(this.OPENED);
         }
+        this.handleClick(event);
     }
 
     /**
@@ -396,7 +397,7 @@ class OxUIService {
      * @param   current image src
      */
     handlerFullOpenImage(full, src) {
-        full.addEventListener("click", () => {
+        full.addEventListener("click", (event) => {
             const imagePreview = document.createElement("div");
             imagePreview.classList.add(this.IMAGE_PREVIEW);
             const close = document.createElement("img");
@@ -406,6 +407,9 @@ class OxUIService {
             imagePreview.appendChild(image);
             
             setTimeout(() => {
+                imagePreview.addEventListener("click", (event) => {
+                    this.handleClick(event);
+                })
                 document.body.appendChild(imagePreview);
                 image.classList = [];
                 if (image.width > image.height) {
@@ -417,6 +421,7 @@ class OxUIService {
             close.addEventListener("click", () => {
                 document.body.removeChild(imagePreview);
             })
+            this.handleClick(event);
         });
     }
 
@@ -452,7 +457,10 @@ class OxUIService {
         const question = content[this.QUESTION_POSITION];
         
         const container = document.createElement("div");
-        container.classList.add(this.QUESTION_CARD)
+        container.classList.add(this.QUESTION_CARD);
+        container.addEventListener("click", (event) => {
+            this.handleClick(event);
+        });
         this.getQuestionHeader(container, Object.values(question)[0]);
 
         if (Object.values(content[this.IMG_POSITION])[0] != "") {
@@ -588,7 +596,7 @@ class OxUIService {
         const div = document.createElement("div");
         div.classList.add(this.SUMMARY_TOGGLE);
         div.id = this.SUMMARY_TOGGLE;
-        div.addEventListener("click" , () => {
+        div.addEventListener("click" , (event) => {
             if (div.classList.contains(this.SUMMARY_TOGGLE_ACTIVE)) {
                 this.closeSummary();
             } else {
@@ -596,7 +604,7 @@ class OxUIService {
                 this.addSummary(summary, summary.total == summary.answeredCorrect + summary.answeredFail);
                 div.classList.add(this.SUMMARY_TOGGLE_ACTIVE);
             }
-            
+            this.handleClick(event);
         });
         document.body.appendChild(div);
     }
@@ -612,6 +620,9 @@ class OxUIService {
         const div = document.createElement("div");
         div.classList.add(this.SUMMARY);
         div.id = this.SUMMARY;
+        div.addEventListener("click", (event) => {
+            this.handleClick(event);
+        });
         const ansCorrectPercentage = (summary.answeredCorrect / summary.total).toFixed(4) * 100;
         const ansPending = summary.total - (summary.answeredCorrect + summary.answeredFail);
         div.innerHTML = `
@@ -740,6 +751,14 @@ class OxUIService {
     tryAgain() {
         if (this.onTryAgain) {
             this.onTryAgain();
+        }
+    }
+
+    handleClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.onClick) {
+            this.onClick();
         }
     }
 }
