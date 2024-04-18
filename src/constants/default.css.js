@@ -19,6 +19,10 @@ const DEFAULT_CSS = `
       to { opacity: 0}
 }
 
+.ox-annotations {
+    height: 100vh;
+}
+
 .ox-annotations > *:not(#ox-custom-html) {
     font-family: "Open Sans";
 }
@@ -204,7 +208,7 @@ const DEFAULT_CSS = `
     position: absolute;
     top: 0;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
