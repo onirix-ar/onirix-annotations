@@ -229,7 +229,7 @@ const DEFAULT_CSS = `
     max-height: calc(100% - 80px - env(safe-area-inset-top));
     margin-top: calc(20px + env(safe-area-inset-top));
     margin-bottom: calc(20px + env(safe-area-inset-bottom));
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .ox-question-card > div:first-child, .ox-summary > div > div:first-child {
