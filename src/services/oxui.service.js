@@ -623,7 +623,8 @@ class OxUIService {
         div.addEventListener("click", (event) => {
             this.handleClick(event);
         });
-        const ansCorrectPercentage = (summary.answeredCorrect / summary.total).toFixed(4) * 100;
+        const ansCorrectPercentage = parseFloat(((summary.answeredCorrect / summary.total) * 100).toFixed(2));
+
         const ansPending = summary.total - (summary.answeredCorrect + summary.answeredFail);
         div.innerHTML = `
         <div>
