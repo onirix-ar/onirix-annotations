@@ -45,7 +45,6 @@ const DEFAULT_CSS = `
     z-index: 999;
 }
 
-
 .ox-datasheet--open {
     top: 0px !important;
     overflow: auto;
@@ -167,6 +166,16 @@ const DEFAULT_CSS = `
 .ox-image-preview--vertical {
     height: auto;
     width:  -webkit-fill-available;
+}
+
+.ox-image-preview--horizontal.zooming {
+    width: auto;
+    height: auto;
+}
+
+.ox-image-preview--vertical.zooming {
+    height: auto;
+    width: auto;
 }
 
 .ox-annotations > .ox-no-datasheet {
