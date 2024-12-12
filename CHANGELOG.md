@@ -4,21 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.0.8 - 2024-12-12
+
+### Added
+
+- Zoom on images within open panels.
+
+### Fixed
+
+- Corrected an issue in the annotations library where the answer verification failed if the dropdown field in the data structure was capitalized as Answer instead of answer.
+- User gestures are not propagated to the experience if there is open html content.
+- Lag observed when opening cards with images.
+
+
 ## 2.0.7 - 2024-10-17
 
-## Fixed
+### Fixed
 
 - Round "summary" to 2 decimals.
 
 ## 2.0.5 - 2024-04-18
 
-## Fixed
+### Fixed
 
 - Merge rigth branch to solve 2.0.4
 
 ## 2.0.4 - 2024-04-16
 
-## Fixed
+### Fixed
 
 - Body height.
 

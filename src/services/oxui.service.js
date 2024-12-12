@@ -48,6 +48,8 @@ class OxUIService {
      * Variables
      */
     isDragging = false;
+    zooming = false;
+    previous_scale = 0;
 
     /**
      * Constructor. Add the CSS
@@ -230,6 +232,7 @@ class OxUIService {
                 current: Math.ceil(event.changedTouches[0].pageY)
             };
         });
+        this.preventTranform(sheet);
         sheet.addEventListener('touchmove', (event) => {
             if(this.isDragging) {
                 if (!sheet.classList.contains(this.OPENED)) {
@@ -347,12 +350,12 @@ class OxUIService {
      * @param   add open full handle
      */
     async addImage(oid, contentElement, showFull = true) {
-        const blob = await this.onGetImage(oid);
-        const url = URL.createObjectURL(blob);
         const div = document.createElement("div");
-        div.style.backgroundImage = `url(${url})`;
         div.classList.add("ox-image");
         contentElement.appendChild(div);
+        const blob = await this.onGetImage(oid);
+        const url = URL.createObjectURL(blob);
+        div.style.backgroundImage = `url(${url})`;
         if (showFull) {
             const full = document.createElement("img");
             full.classList.add(this.EXPAND);
@@ -409,7 +412,8 @@ class OxUIService {
             setTimeout(() => {
                 imagePreview.addEventListener("click", (event) => {
                     this.handleClick(event);
-                })
+                });
+                this.preventTranform(imagePreview);
                 document.body.appendChild(imagePreview);
                 image.classList = [];
                 if (image.width > image.height) {
@@ -417,11 +421,52 @@ class OxUIService {
                 } else {
                     image.classList.add(this.VERTICAL)
                 }
+                this.handleZoom(image);
             }, 300);
             close.addEventListener("click", () => {
+                this.zooming = false;
                 document.body.removeChild(imagePreview);
             })
             this.handleClick(event);
+        });
+    }
+
+    /**
+     * Allow zoom on fulscreen images
+     * 
+     * @param   image element
+     */
+    handleZoom(image) {
+        image.addEventListener('touchstart', function (e) {
+            if (e.touches.length == 2) {
+                if (!this.zooming) {
+                    this.zooming = true;
+                    image.addEventListener("touchmove",(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        image.classList.add("zooming")
+                        const scale = event.scale;
+                    
+                        let zoom = image.style.zoom;
+                        if (zoom != "") {
+                            zoom = zoom.split("%")[0]
+                        } else {
+                            zoom = 40;
+                        }
+                        if (scale > this.previous_scale) {
+                            if ((parseInt(zoom) + 1) <= 100) {
+                                image.style.zoom = (parseInt(zoom) + 1) + "%"
+                            }
+                        } else {
+                            if ((parseInt(zoom) - 1) >= 20) {
+                                image.style.zoom = (parseInt(zoom) - 1) + "%"
+                            }   
+                        }
+                        this.previous_scale = scale  
+                    }) 
+                }
+                
+            }
         });
     }
 
@@ -461,6 +506,7 @@ class OxUIService {
         container.addEventListener("click", (event) => {
             this.handleClick(event);
         });
+        this.preventTranform(container);
         this.getQuestionHeader(container, Object.values(question)[0]);
 
         if (Object.values(content[this.IMG_POSITION])[0] != "") {
@@ -472,6 +518,7 @@ class OxUIService {
         const cards = document.createElement("div");
         cards.id = this.CARDS;
         cards.classList.add(this.CARDS);
+        this.preventTranform(cards);
         container.getElementsByTagName("img")[0].addEventListener("click", (event) => {
             document.body.removeChild(cards);
             this.onAbort();
@@ -517,7 +564,7 @@ class OxUIService {
      */
     getAnswers(container, content) {
         const ul = document.createElement("ul");
-        const correct = content[content.length - 1].answer;
+        const correct = Object.values(content[content.length - 1])[0];
         for (let i = this.FIRST_ANSWER; i < content.length - 1; i++) {
             for (const [key, value] of Object.entries(content[i])) {
                 if (value != "") {
@@ -623,6 +670,7 @@ class OxUIService {
         div.addEventListener("click", (event) => {
             this.handleClick(event);
         });
+        this.preventTranform(div);
         const ansCorrectPercentage = parseFloat(((summary.answeredCorrect / summary.total) * 100).toFixed(2));
 
         const ansPending = summary.total - (summary.answeredCorrect + summary.answeredFail);
@@ -761,6 +809,17 @@ class OxUIService {
         if (this.onClick) {
             this.onClick();
         }
+    }
+
+    /**
+     * Avoid transform controls when a pane is open
+     * 
+     * @param   panel 
+     */
+    preventTranform(element) {
+        element.addEventListener("touchmove", (event) => {
+            event.stopPropagation();
+        });
     }
 }
 
