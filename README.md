@@ -1,6 +1,6 @@
 # Onirix Annotations
 
-![Version](https://img.shields.io/badge/version-2.0.8-blue.svg?cacheSeconds=2592000)
+![Version](https://img.shields.io/badge/version-2.0.9-blue.svg?cacheSeconds=2592000)
 [![Twitter: onirix](https://img.shields.io/twitter/follow/onirix.svg?style=social)](https://twitter.com/onirix)
 
 Onirix Annotations allows you to display information associated with the elements of an Onirix Studio experience in a convenient and simple way.
@@ -29,14 +29,14 @@ Include the dependency within the HTML head tag:
 
 ```html
 <head>
-    <script src="https://unpkg.com/@onirix/annotations-module@2.0.8/dist/ox-annotations-module.umd.js"/>
+    <script src="https://unpkg.com/@onirix/annotations-module@2.0.9/dist/ox-annotations-module.umd.js"/>
 </head>
 ```
 
 As ESM modules:
 
 ```js
-import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@2.0.8/dist/ox-annotations-module.esm.js";
+import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@2.0.9/dist/ox-annotations-module.esm.js";
 ```
 
 ## Usage
@@ -44,8 +44,8 @@ import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-modul
 To use this library, first, the embedsdk must be initialize and pass it to the constructor.
 
 ```js
-import OnirixEmbedSDK from "https://unpkg.com/@onirix/embed-sdk@1.13.0/dist/ox-embed-sdk.esm.js";
-import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@2.0.8/dist/ox-annotations-module.esm.js";
+import OnirixEmbedSDK from "https://unpkg.com/@onirix/embed-sdk@1.15.0/dist/ox-embed-sdk.esm.js";
+import OnirixAnnotationsModule from "https://unpkg.com/@onirix/annotations-module@2.0.9/dist/ox-annotations-module.esm.js";
 
 const embedSDK = new OnirixEmbedSDK();
 embedSDK.connect();
