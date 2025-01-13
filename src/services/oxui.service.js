@@ -804,7 +804,9 @@ class OxUIService {
     }
 
     handleClick(event) {
-        event.preventDefault();
+        if (event.target.tagName.toLocaleLowerCase() != "a") {
+            event.preventDefault();
+        }
         event.stopPropagation();
         if (this.onClick) {
             this.onClick();
