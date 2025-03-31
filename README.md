@@ -1,6 +1,6 @@
 # Onirix Annotations
 
-![Version](https://img.shields.io/badge/version-2.0.10-blue.svg?cacheSeconds=2592000)
+![Version](https://img.shields.io/badge/version-2.0.11-blue.svg?cacheSeconds=2592000)
 [![Twitter: onirix](https://img.shields.io/twitter/follow/onirix.svg?style=social)](https://twitter.com/onirix)
 
 Onirix Annotations allows you to display information associated with the elements of an Onirix Studio experience in a convenient and simple way.
@@ -29,14 +29,14 @@ Include the dependency within the HTML head tag:
 
 ```html
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@onirix/annotations-module@2.0.10/+esm"/>
+    <script src="https://cdn.jsdelivr.net/npm/@onirix/annotations-module@2.0.11/+esm"/>
 </head>
 ```
 
 As ESM modules:
 
 ```js
-import OnirixAnnotationsModule from "https://cdn.jsdelivr.net/npm/@onirix/annotations-module@2.0.10/+esm";
+import OnirixAnnotationsModule from "https://cdn.jsdelivr.net/npm/@onirix/annotations-module@2.0.11/+esm";
 ```
 
 ## Usage
@@ -45,7 +45,7 @@ To use this library, first, the embedsdk must be initialize and pass it to the c
 
 ```js
 import OnirixEmbedSDK from "https://cdn.jsdelivr.net/npm/@onirix/embed-sdk@1.17.1/+esm";
-import OnirixAnnotationsModule from "https://cdn.jsdelivr.net/npm/@onirix/annotations-module@2.0.10/+esm";
+import OnirixAnnotationsModule from "https://cdn.jsdelivr.net/npm/@onirix/annotations-module@2.0.11/+esm";
 
 const embedSDK = new OnirixEmbedSDK();
 embedSDK.connect();
